@@ -1,0 +1,256 @@
+<html>
+<head>
+
+<title>ugeeSignDemo</title>
+<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' /> 	
+	
+<link rel='stylesheet' type='text/css' href='css/style.css' />
+	<link rel="stylesheet" type="text/css" href="css/law.css"/>	
+<link rel="stylesheet" type="text/css" href="css/pageturning.css"/>	
+<script type="text/javascript" src="js/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript" src="js/pageturning.js"></script>
+
+<script language="javascript" type="text/javascript">
+
+var wsUri = "ws://localhost:12349/sfinger";
+        var websocket;
+
+		function sendSignMessage() {
+               
+                if ( websocket != null )
+                {
+ 
+		   var str1="{\"cmdtype\": \"getSignEx\",\"message\": {\"penwidth\": 8,\"pos_x\": 250,\"pos_y\": 200,\"width\": 800,\"height\": 500,\"show\": 1,\"png_path\":\"/home/sign/sf_sign.png\"}}";//签字+指纹模块的 签字图片，名称不能与指纹相同，否则会冲突
+                    websocket.send(str1);
+                    console.log( "string sent :", '"'+str1+'"' );
+                }
+         }
+
+		function sendFingerMessage() {
+		           
+		    if ( websocket != null )
+		    {
+
+		        var str1="{\"cmdtype\": \"getFinger\",\"message\": {\"pos_x\": 350,\"pos_y\": 250,\"width\": 256,\"height\": 360,\"png_path\":\"/home/sign/sf_finger.png\"}}";//Final combined image of signature + fingerprint
+		        websocket.send(str1);
+		        console.log( "string sent :", '"'+str1+'"' );
+		    }
+		}
+
+
+
+        function initWebSocket() {
+			pageInit();
+	
+        try {
+            if (typeof MozWebSocket == 'function')
+                    WebSocket = MozWebSocket;
+                if ( websocket && websocket.readyState == 1 )
+                    websocket.close();
+                websocket = new WebSocket( wsUri );
+                websocket.onopen = function (evt) {
+                       sendSignMessage();
+                };
+                websocket.onclose = function (evt) {
+                    
+                };
+                websocket.onmessage = function (evt) {
+                    console.log( "Message received :", evt.data );
+                    	
+					var obj = JSON.parse(evt.data); 
+
+					if(obj.response=="signBase64")	{
+
+						document.getElementById('signImage').src='data:image/jpg;base64,'+obj.message;
+
+						sendFingerMessage();
+					}
+
+
+					if(obj.response=="fingerBase64"){
+
+							mixfingersign();
+					}
+
+					if(obj.response=="mixImgBase64"){
+
+							document.getElementById('signImage').src='data:image/jpg;base64,'+ obj.message;
+					}
+
+
+					if(obj.response=="btninfo")
+						btnclick(obj.message);
+					
+                };
+                websocket.onerror = function (evt) {
+                    console.log('ERROR: ' + evt.data);
+                };
+            } catch (exception) {
+                console.log('ERROR: ' + exception);
+            }
+        }
+
+
+
+
+        function mixfingersign() {
+
+            if ( websocket != null )
+            {
+                var str1="{\"cmdtype\": \"mixsigAndfinger\",\"message\": {\"url\": \"vvv\"}}";
+                websocket.send(str1);
+                console.log( "string sent :", '"'+str1+'"' );
+            }
+        }
+
+
+
+
+
+		function btnclick(data)
+		{
+			var pox = data.split(":")	
+			var x = pox[0];
+			var y = pox[1];
+			elem = document.elementFromPoint(x, y); //Pass in the coordinate value and return the top-level element containing the coordinate point on the current page	
+			var elemId = elem.id;
+			//alert(elemId);
+			var e = document.getElementById(elemId);
+			if(elemId == "pageup")
+			{
+				//alert("pageup");
+				pageUp();
+			}
+			if(elemId == "pagedown")
+			{
+				//alert("pagedown");
+				pageDown();
+			}					
+		}
+
+ 
+
+</script>
+</head>
+
+  <body onload="initWebSocket()">
+	  <button id="pageup">Previous page</button>
+	  <button id="pagedown">Next page</button>
+
+	<div id="frameContent" class="frameContent">
+
+	<div id="page-wrap" style="background-color:#F8F8FF">
+
+		<textarea id="header">INVOICE</textarea>
+		
+		<div id="identity">
+		
+            <textarea id="address"  >
+Peking, China</textarea>
+		
+		</div>
+		
+		<div style="clear:both"></div>
+		
+		<div id="customer">
+
+            <textarea id="customer-title"  >IT department of xxx company</textarea>
+
+            <table id="meta">
+                <tr>
+                    <td class="meta-head">Invoice #</td>
+                    <td><textarea  >000123</textarea></td>
+                </tr>
+                <tr>
+
+                    <td class="meta-head">Date</td>
+                    <td><textarea id="date"  >December 15, 2009</textarea></td>
+                </tr>
+                <tr>
+                    <td class="meta-head">Amount Due</td>
+                    <td><div class="due">$875.00</div></td>
+                </tr>
+
+            </table>
+		
+		</div>
+		
+		<table id="items">
+		
+		  <tr>
+		      <th>Item</th>
+		      <th>Description</th>
+		      <th>Unit Cost</th>
+		      <th>Quantity</th>
+		      <th>Price</th>
+		  </tr>
+		  
+		  <tr class="item-row">
+		      <td class="item-name"><div class="delete-wpr"><textarea  >Web Updates</textarea></div></td>
+		      <td class="description"><textarea  >Monthly web updates for http://widgetcorp.com (Nov. 1 - Nov. 30, 2009)</textarea></td>
+		      <td><textarea class="cost"  >$650.00</textarea></td>
+		      <td><textarea class="qty"  >1</textarea></td>
+		      <td><span class="price">$650.00</span></td>
+		  </tr>
+		  
+		  <tr class="item-row">
+		      <td class="item-name"><div class="delete-wpr"><textarea  >SSL Renewals</textarea></div></td>
+		      <td class="description"><textarea  >Yearly renewals of SSL certificates on main domain and several subdomains</textarea></td>
+		      <td><textarea class="cost"  >$75.00</textarea></td>
+		      <td><textarea class="qty"  >3</textarea></td>
+		      <td><span class="price">$225.00</span></td>
+		  </tr>
+		  
+		  <tr class="item-row">
+		      <td class="item-name"><div class="delete-wpr"><textarea  >SSL Renewals</textarea></div></td>
+		      <td class="description"><textarea  >Yearly renewals of SSL certificates on main domain and several subdomains</textarea></td>
+		      <td><textarea class="cost"  >$75.00</textarea></td>
+		      <td><textarea class="qty"  >3</textarea></td>
+		      <td><span class="price">$225.00</span></td>
+		  </tr>
+
+ 		  <tr class="item-row">
+		      <td class="item-name"><div class="delete-wpr"><textarea  >SSL Renewals</textarea></div></td>
+		      <td class="description"><textarea  >Yearly renewals of SSL certificates on main domain and several subdomains</textarea></td>
+		      <td><textarea class="cost"  >$75.00</textarea></td>
+		      <td><textarea class="qty"  >3</textarea></td>
+		      <td><span class="price">$225.00</span></td>
+		  </tr>
+
+		  
+		  <tr id="hiderow">
+		    <td colspan="5"><a id="customer-title" title="Add a row">Customer signature:</a>
+			</td>
+			
+		  </tr>
+		  
+		  <tr>
+		      <td rowspan="4" colspan="2" class="blank" align="center" valign="middle"><div id="imgcontain" class="imgcontain"><img id="signImage" style="width: 100%;"></img></div></td>
+		      <td colspan="2" class="total-line">Subtotal</td>
+		      <td class="total-value"><div id="subtotal">$875.00</div></td>
+		  </tr>
+		  <tr>
+		      <td colspan="2" class="total-line">Total</td>
+		      <td class="total-value"><div id="total">$875.00</div></td>
+		  </tr>
+		  <tr>
+		      <td colspan="2" class="total-line">Amount Paid</td>
+
+		      <td class="total-value"><textarea id="paid">$0.00</textarea></td>
+		  </tr>
+		  <tr>
+		      <td colspan="2" class="total-line balance">Balance Due</td>
+		      <td class="total-value balance"><div class="due">$875.00</div></td>
+		  </tr>
+		
+		</table>
+		
+		<div id="terms">
+		  <h5>Terms</h5>
+		  <textarea>NET 30 Days. Finance Charge of 1.5% will be made on unpaid balances after 30 days.</textarea>
+		</div>
+	
+	</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Categories=Application;Graphics;VectorGraphics;Engineering;Construction;2DGraphics;
+Comment=tablet monitor screen setting
+Comment[zh_CN]=手写屏设置工具
+Exec=/usr/lib/com.hvug.tabletmonitor/start.sh
+Icon=/usr/share/icons/tabletmonitor.png
+Name=tablet monitor
+Name[zh_CN]=屏幕设置工具
+StartupNotify=true
+Terminal=false
+Type=Application
+Version=1.3.2-1
+X-Deepin-Vendor=user-custom
